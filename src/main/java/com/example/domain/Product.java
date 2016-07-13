@@ -34,7 +34,7 @@ public class Product extends AbstractEntity {
     public void addPrice(Price price) {
         checkArgument(!prices.stream()
                 .filter(c -> c.isSameCountry(price))
-                .filter(c -> !c.isOverlapping(price))
+                .filter(c -> c.isOverlapping(price))
                 .findFirst().isPresent(),
                 "Prices must not overlap");
         prices.add(price);

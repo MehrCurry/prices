@@ -7,6 +7,7 @@ import javax.persistence.Embeddable;
 import java.time.LocalDateTime;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Embeddable
 @Builder
@@ -22,16 +23,17 @@ public class DateRange {
 
     public DateRange(LocalDateTime from, LocalDateTime to) {
         checkArgument(to == null || from == null || to.isAfter(from));
-        this.from = from;
-        this.to = to;
+        this.from = from!=null ? from : LocalDateTime.MIN;
+        this.to = to!=null ? to : LocalDateTime.MAX;
     }
 
     public boolean isInRange(LocalDateTime other) {
+        checkNotNull(other);
         return (from == null || from.equals(other) || from.isBefore(other) )
                 && (to == null || to.isAfter(other));
     }
 
     public boolean isOverlapping(DateRange validity) {
-        return isInRange(validity.getFrom()) || isInRange(validity.getTo());
+        return from.isBefore(validity.getTo()) && validity.getFrom().isBefore(getTo());
     }
 }

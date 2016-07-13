@@ -55,6 +55,10 @@ public class ProductTest {
                 .to(end2)
                 .build();
 
+        DateRange third = DateRange.builder()
+                .from(end2)
+                .build();
+
         Price p1 = Price.builder()
                 .countryCode("DE")
                 .validity(range)
@@ -63,17 +67,47 @@ public class ProductTest {
 
         Price p2 = Price.builder()
                 .countryCode("DE")
-                .validity(range)
+                .validity(second)
                 .money(Money.of(13,"EUR"))
                 .build();
 
-        p.addPrices(p1,p2);
+        Price p3 = Price.builder()
+                .countryCode("DE")
+                .validity(third)
+                .money(Money.of(14,"EUR"))
+                .build();
+
+        p.addPrices(p1,p2,p3);
 
         assertThat(p.getPrice("DE",start).get()).isEqualTo(p1);
         assertThat(p.getPrice("DE",end).get()).isEqualTo(p2);
-        assertThat(p.getPrice("DE",end2).get()).isEqualTo(p2);
-        assertThat(p.getPrice("US",end2).get()).isEqualTo(p2);
+        assertThat(p.getPrice("DE",end2).get()).isEqualTo(p3);
+        assertThat(p.getPrice("US",end2)).isEmpty();
+    }
 
+    @Test
+    public void testOverlapWithDifferentCountry() {
+        DateRange range = DateRange.builder()
+                .from(start)
+                .to(end)
+                .build();
+
+        Price p1 = Price.builder()
+                .countryCode("DE")
+                .validity(range)
+                .money(Money.of(12,"EUR"))
+                .build();
+
+        Price p2 = Price.builder()
+                .countryCode("US")
+                .validity(range)
+                .money(Money.of(12,"USD"))
+                .build();
+
+        Product product = new Product("test");
+        product.addPrices(p1,p2);
+        assertThat(product.getPrice("DE",start).get()).isEqualTo(p1);
+        assertThat(product.getPrice("US",start).get()).isEqualTo(p2);
     }
 
 }

@@ -31,6 +31,7 @@ public class ApplicationLoader implements ApplicationRunner {
                         .to(end)
                         .build())
                 .money(Money.of(12,"EUR"))
+                .countryCode("DE")
                 .build());
         p.addPrice(Price.builder()
                 .validity(DateRange.builder()
@@ -38,6 +39,7 @@ public class ApplicationLoader implements ApplicationRunner {
                         .to(end)
                         .build())
                 .money(Money.of(13,"EUR"))
+                .countryCode("US")
                 .build());
         repository.save(p);
         repository.findAll().forEach(e -> log.debug(e.toString()));
