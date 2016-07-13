@@ -7,11 +7,10 @@ import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -28,7 +27,7 @@ public class Product extends AbstractEntity {
         this.name = name;
     }
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER,mappedBy = "product")
     private Set<Price> prices = new HashSet<>();
 
     public void addPrice(Price price) {
@@ -37,6 +36,7 @@ public class Product extends AbstractEntity {
                 .filter(c -> c.isOverlapping(price))
                 .findFirst().isPresent(),
                 "Prices must not overlap");
+        price.setProduct(this);
         prices.add(price);
     }
 
@@ -46,6 +46,10 @@ public class Product extends AbstractEntity {
         }
     }
 
+    public Optional<Price> getPrice(String countryCode) {
+        return getPrice(countryCode,LocalDateTime.now());
+    }
+
     public Optional<Price> getPrice(String countryCode, LocalDateTime pointInTime) {
         checkNotNull(countryCode);
         checkNotNull(pointInTime);
@@ -53,5 +57,13 @@ public class Product extends AbstractEntity {
                 .filter(p -> p.isBelongingTo(countryCode))
                 .filter(p -> p.isValidAt(pointInTime))
                 .findFirst();
+    }
+
+    public void addPrices(List<Price> prices) {
+        prices.forEach(p -> addPrice(p));
+    }
+
+    public Collection<Price> getPrices() {
+        return Collections.unmodifiableSet(prices);
     }
 }

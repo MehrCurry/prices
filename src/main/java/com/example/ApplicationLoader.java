@@ -12,6 +12,10 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -23,24 +27,20 @@ public class ApplicationLoader implements ApplicationRunner {
     public void run(ApplicationArguments applicationArguments) throws Exception {
         LocalDateTime start = LocalDateTime.parse("2007-12-03T10:15:30");
         LocalDateTime end = LocalDateTime.parse("2007-12-04T10:15:26");
+        final DateRange dateRange = DateRange.builder()
+                .from(start)
+                .build();
 
         Product p = new Product("Test");
-        p.addPrice(Price.builder()
-                .validity(DateRange.builder()
-                        .from(start)
-                        .to(end)
-                        .build())
-                .money(Money.of(12,"EUR"))
-                .countryCode("DE")
-                .build());
-        p.addPrice(Price.builder()
-                .validity(DateRange.builder()
-                        .from(start)
-                        .to(end)
-                        .build())
-                .money(Money.of(13,"EUR"))
-                .countryCode("US")
-                .build());
+
+        List<Price> prices = Arrays.stream(Locale.getISOCountries()).map(c -> {
+            return Price.builder()
+                    .validity(dateRange)
+                    .money(Money.of(12, "EUR"))
+                    .countryCode(c)
+                    .build();
+        }).collect(Collectors.toList());
+        p.addPrices(prices);
         repository.save(p);
         repository.findAll().forEach(e -> log.debug(e.toString()));
     }

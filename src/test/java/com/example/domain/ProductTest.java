@@ -110,4 +110,33 @@ public class ProductTest {
         assertThat(product.getPrice("US",start).get()).isEqualTo(p2);
     }
 
+    @Test
+    public void testGetPriceNow() {
+
+        Price p1 = Price.builder()
+                .countryCode("DE")
+                .validity(DateRange.builder()
+                        .from(start)
+                        .to(end)
+                        .build())
+                .money(Money.of(12,"EUR"))
+                .build();
+
+
+        Product product = new Product("test");
+        product.addPrices(p1);
+        assertThat(product.getPrice("DE")).isEmpty();
+
+        Price p2 = Price.builder()
+                .countryCode("DE")
+                .validity(DateRange.builder()
+                        .from(end)
+                        .build())
+                .money(Money.of(13,"EUR"))
+                .build();
+        product.addPrice(p2);
+        assertThat(product.getPrice("DE").get()).isEqualTo(p2);
+
+    }
+
 }
