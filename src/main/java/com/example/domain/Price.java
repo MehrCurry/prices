@@ -10,6 +10,7 @@ import org.javamoney.moneta.Money;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import java.time.LocalDateTime;
 
 @TypeDef(name = "testmoneta_MoneyAmountWithCurrencyType", typeClass = PersistentMoneyAmountAndCurrency.class)
 @EqualsAndHashCode(callSuper = false)
@@ -27,4 +28,20 @@ public class Price extends AbstractEntity {
     @Embedded
     private DateRange validity;
     private String countryCode;
+
+    public boolean isValidAt(LocalDateTime pointInTime) {
+        return validity.isInRange(pointInTime);
+    }
+
+    public boolean isSameCountry(Price other) {
+        return countryCode.equals(other.getCountryCode());
+    }
+
+    public boolean isOverlapping(Price other) {
+        return validity.isOverlapping(other.validity);
+    }
+
+    public boolean isBelongingTo(String countryCode) {
+        return this.countryCode.equals(countryCode);
+    }
 }

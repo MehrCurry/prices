@@ -8,10 +8,13 @@ import lombok.ToString;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -29,9 +32,11 @@ public class Product extends AbstractEntity {
     private Set<Price> prices = new HashSet<>();
 
     public void addPrice(Price price) {
-        checkArgument(prices.stream()
-                .filter(c -> c.getCountryCode().equals(price.getCountryCode()))
-                .filter(c -> !c.getValidity().isOverlapping(price.getValidity())).findFirst().isPresent());
+        checkArgument(!prices.stream()
+                .filter(c -> c.isSameCountry(price))
+                .filter(c -> !c.isOverlapping(price))
+                .findFirst().isPresent(),
+                "Prices must not overlap");
         prices.add(price);
     }
 
@@ -39,5 +44,14 @@ public class Product extends AbstractEntity {
         for (Price p:prices) {
             addPrice(p);
         }
+    }
+
+    public Optional<Price> getPrice(String countryCode, LocalDateTime pointInTime) {
+        checkNotNull(countryCode);
+        checkNotNull(pointInTime);
+        return prices.stream()
+                .filter(p -> p.isBelongingTo(countryCode))
+                .filter(p -> p.isValidAt(pointInTime))
+                .findFirst();
     }
 }
