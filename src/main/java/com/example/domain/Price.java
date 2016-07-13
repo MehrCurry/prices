@@ -26,4 +26,5 @@ public class Price extends AbstractEntity {
     private Money money;
     @Embedded
     private DateRange validity;
+    private String countryCode;
 }

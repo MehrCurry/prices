@@ -31,4 +31,7 @@ public class DateRange {
                 && (to == null || to.isAfter(other));
     }
 
+    public boolean isOverlapping(DateRange validity) {
+        return isInRange(validity.getFrom()) || isInRange(validity.getTo());
+    }
 }

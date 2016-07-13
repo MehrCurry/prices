@@ -71,4 +71,29 @@ public class DateRangeTest {
                 .to(end)
                 .build();
     }
+
+    @Test
+    public void testIsOverlapping() {
+        DateRange range = DateRange.builder()
+                .from(start)
+                .to(end)
+                .build();
+
+        assertThat(range.isOverlapping(range)).isTrue();
+
+        LocalDateTime end2 = LocalDateTime.parse("2007-12-05T10:15:26");
+        DateRange second = DateRange.builder()
+                .from(end)
+                .to(end2)
+                .build();
+
+        assertThat(range.isOverlapping(second)).isFalse();
+
+        DateRange third = DateRange.builder()
+                .from(end.minusSeconds(1))
+                .to(end2)
+                .build();
+
+        assertThat(range.isOverlapping(third)).isTrue();
+    }
 }

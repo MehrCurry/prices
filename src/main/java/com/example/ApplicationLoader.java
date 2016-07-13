@@ -24,7 +24,7 @@ public class ApplicationLoader implements ApplicationRunner {
         LocalDateTime start = LocalDateTime.parse("2007-12-03T10:15:30");
         LocalDateTime end = LocalDateTime.parse("2007-12-04T10:15:26");
 
-        Product p = Product.builder().name("Test").build();
+        Product p = new Product("Test");
         p.addPrice(Price.builder()
                 .validity(DateRange.builder()
                         .from(start)
