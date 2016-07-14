@@ -77,6 +77,15 @@
             <artifactId>usertype.extended</artifactId>
             <version>5.0.0.GA</version>
         </dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.zalando</groupId>
+			<artifactId>jackson-datatype-money</artifactId>
+			<version>0.8.0</version>
+		</dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
@@ -100,6 +109,13 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>springloaded</artifactId>
+                        <version>1.2.6.RELEASE</version>
+                    </dependency>
+                </dependencies>
 			</plugin>
 		</plugins>
 	</build>

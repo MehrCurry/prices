@@ -1,5 +1,8 @@
 package com.example.domain;
 
+import com.example.converter.LocalDateTimeSerializer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -17,8 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @NoArgsConstructor
 public class DateRange {
     @Column(name = "DFROM")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime from;
     @Column(name = "DTO")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime to;
 
     public DateRange(LocalDateTime from, LocalDateTime to) {
@@ -37,6 +42,7 @@ public class DateRange {
         return from.isBefore(validity.getTo()) && validity.getFrom().isBefore(getTo());
     }
 
+    @JsonIgnore
     public boolean isOpenEnded() {
         return LocalDateTime.MAX.equals(to);
     }

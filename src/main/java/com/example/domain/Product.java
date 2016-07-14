@@ -5,95 +5,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import java.time.LocalDateTime;
-import java.util.*;
+import javax.persistence.ManyToMany;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-import static com.google.common.base.Preconditions.*;
-
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ToString
 @NoArgsConstructor
 @Getter
 @Entity
-public class Product extends AbstractEntity {
-    private String name;
+public class Product extends BillableEntity {
+
+    @ManyToMany
+    private Set<Service> requiredServices = new HashSet<>();
+
+    @ManyToMany
+    private Set<Service> excludedServices = new HashSet<>();
 
     public Product(String name) {
-        this.name = name;
+        super(name);
     }
 
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER,mappedBy = "product")
-    private Set<Price> prices = new HashSet<>();
-
-    public void addPrice(Price price) {
-        checkArgument(!prices.stream()
-                .filter(c -> c.isSameCountry(price))
-                .filter(c -> c.isOverlapping(price))
-                .findFirst().isPresent(),
-                "Prices must not overlap");
-        price.setProduct(this);
-        prices.add(price);
+    public void addRequiredServices(Service... services) {
+        requiredServices.addAll(Arrays.asList(services));
     }
 
-    public void addPrices(Price... prices) {
-        for (Price p:prices) {
-            addPrice(p);
-        }
+    public void addExcludedServices(Service... services) {
+        excludedServices.addAll(Arrays.asList(services));
     }
 
-    public Optional<Price> getPrice() {
-        return getPrice(Locale.getDefault().getCountry());
-    }
-
-    public Optional<Price> getPrice(String countryCode) {
-        return getPrice(countryCode,LocalDateTime.now());
-    }
-
-    public Optional<Price> getPrice(String countryCode, LocalDateTime pointInTime) {
-        checkNotNull(countryCode);
-        checkNotNull(pointInTime);
-        return prices.stream()
-                .filter(p -> p.isBelongingTo(countryCode))
-                .filter(p -> p.isValidAt(pointInTime))
-                .findFirst();
-    }
-
-    public void updatePriceByDueDate(Price newPrice) {
-        Price currentPrice=getPrice(newPrice.getCountryCode())
-                .orElseThrow(() -> new IllegalStateException("no current price found"));
-        checkState(currentPrice
-                .isOpenEnded(),"update only works if current price is open ended");
-        checkState(newPrice.getValidity()
-                .getFrom().isAfter(currentPrice.getValidity().getFrom()),"new price must be after current price");
-
-        DateRange range=DateRange.builder()
-                .from(currentPrice.getValidity().getFrom())
-                .to(newPrice.getValidity().getFrom())
-                .build();
-
-        Price currentPriceEnded = Price.builder()
-                .validity(range)
-                .countryCode(currentPrice.getCountryCode())
-                .money(currentPrice.getMoney())
-                .build();
-
-        removePrice(currentPrice);
-        addPrices(currentPriceEnded,newPrice);
-    }
-
-    private void removePrice(Price aPrice) {
-        prices.remove(aPrice);
-    }
-
-    public void addPrices(List<Price> prices) {
-        prices.forEach(p -> addPrice(p));
-    }
-
-    public Collection<Price> getPrices() {
-        return Collections.unmodifiableSet(prices);
-    }
 }

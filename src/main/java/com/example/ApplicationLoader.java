@@ -1,9 +1,6 @@
 package com.example;
 
-import com.example.domain.DateRange;
-import com.example.domain.Price;
-import com.example.domain.Product;
-import com.example.domain.ProductRepository;
+import com.example.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.javamoney.moneta.Money;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +20,9 @@ public class ApplicationLoader implements ApplicationRunner {
     @Autowired
     private ProductRepository repository;
 
+    @Autowired
+    private ServiceRepository serviceRepository;
+
     @Override
     public void run(ApplicationArguments applicationArguments) throws Exception {
         LocalDateTime start = LocalDateTime.parse("2007-12-03T10:15:30");
@@ -30,6 +30,10 @@ public class ApplicationLoader implements ApplicationRunner {
         final DateRange dateRange = DateRange.builder()
                 .from(start)
                 .build();
+
+
+        final Service express = new Service("express");
+        serviceRepository.save(express);
 
         Product p = new Product("Test");
 
@@ -41,6 +45,7 @@ public class ApplicationLoader implements ApplicationRunner {
                     .build();
         }).collect(Collectors.toList());
         p.addPrices(prices);
+        p.addRequiredServices(express);
         repository.save(p);
         repository.findAll().forEach(e -> log.debug(e.toString()));
     }

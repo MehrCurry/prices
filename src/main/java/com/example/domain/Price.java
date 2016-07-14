@@ -1,12 +1,13 @@
 package com.example.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.jadira.usertype.moneyandcurrency.moneta.PersistentMoneyAmountAndCurrency;
-import org.javamoney.moneta.Money;
 
+import javax.money.MonetaryAmount;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -25,14 +26,15 @@ public class Price extends AbstractEntity {
 
     @Columns(columns = { @Column(name = "MY_CURRENCY"), @Column(name = "MY_AMOUNT") })
     @Type(type = "testmoneta_MoneyAmountWithCurrencyType")
-    private Money money;
+    private MonetaryAmount money;
     @Embedded
     private DateRange validity;
     private String countryCode;
 
     @ManyToOne
     @Setter
-    private Product product;
+    @JsonIgnore
+    private BillableEntity billable;
 
     public boolean isValidAt(LocalDateTime pointInTime) {
         return validity.isInRange(pointInTime);
@@ -50,6 +52,7 @@ public class Price extends AbstractEntity {
         return this.countryCode.equals(countryCode);
     }
 
+    @JsonIgnore
     public boolean isOpenEnded() {
         return validity.isOpenEnded();
     }

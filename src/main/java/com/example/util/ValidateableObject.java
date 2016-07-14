@@ -1,5 +1,7 @@
 package com.example.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Transient;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -17,6 +19,7 @@ public abstract class ValidateableObject {
 
     @Transient
     @org.springframework.data.annotation.Transient
+    @JsonIgnore
     public boolean isValid() {
         return validationErrors().size() == 0;
     }
