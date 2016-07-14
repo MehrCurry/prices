@@ -36,4 +36,8 @@ public class DateRange {
     public boolean isOverlapping(DateRange validity) {
         return from.isBefore(validity.getTo()) && validity.getFrom().isBefore(getTo());
     }
+
+    public boolean isOpenEnded() {
+        return LocalDateTime.MAX.equals(to);
+    }
 }

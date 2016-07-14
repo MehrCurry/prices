@@ -8,6 +8,7 @@ import org.junit.rules.ExpectedException;
 
 import java.time.LocalDateTime;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProductTest {
@@ -139,4 +140,57 @@ public class ProductTest {
 
     }
 
+    @Test
+    public void testGetPriceByLocale() {
+        DateRange range = DateRange.builder()
+                .from(start)
+                .build();
+
+        Price aPrice = Price.builder()
+                .countryCode("FR")
+                .validity(range)
+                .money(Money.of(12,"EUR"))
+                .build();
+
+        p.addPrice(aPrice);
+        assertThat(p.getPrice()).isEmpty();
+
+        Price dePrice = Price.builder()
+                .countryCode("DE")
+                .validity(range)
+                .money(Money.of(12,"EUR"))
+                .build();
+
+        p.addPrice(dePrice);
+        assertThat(p.getPrice().get()).isEqualTo(dePrice);
+    }
+
+    @Test
+    public void testUpdatePrice() throws InterruptedException {
+        DateRange range = DateRange.builder()
+                .from(start)
+                .build();
+        Price dePrice = Price.builder()
+                .countryCode("DE")
+                .validity(range)
+                .money(Money.of(12,"EUR"))
+                .build();
+
+        Product aProduct = new Product("test");
+        aProduct.addPrice(dePrice);
+
+        Price newPrice = Price.builder()
+                .countryCode("DE")
+                .validity(DateRange.builder()
+                        .from(LocalDateTime.now())
+                        .build())
+                .money(Money.of(12.50,"EUR"))
+                .build();
+
+        aProduct.updatePriceByDueDate(newPrice);
+        MILLISECONDS.sleep(100);
+        assertThat(aProduct.getPrices()).contains(newPrice);
+        assertThat(aProduct.getPrices()).doesNotContain(dePrice);
+        assertThat(aProduct.getPrice().get()).isEqualTo(newPrice);
+    }
 }

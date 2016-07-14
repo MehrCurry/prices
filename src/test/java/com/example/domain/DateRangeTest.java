@@ -15,20 +15,20 @@ public class DateRangeTest {
 
     private LocalDateTime start;
     private LocalDateTime end;
+    private DateRange range;
 
     @Before
     public void setUp() throws Exception {
         start = LocalDateTime.parse("2007-12-03T10:15:30");
         end = LocalDateTime.parse("2007-12-04T10:15:26");
+        range = DateRange.builder()
+                .from(start)
+                .to(end)
+                .build();
     }
 
     @Test
     public void testInclusiveRange() {
-        DateRange range = DateRange.builder()
-                .from(start)
-                .to(end)
-                .build();
-
         assertThat(range.isInRange(start)).isTrue();
         assertThat(range.isInRange(start.minusSeconds(1))).isFalse();
         assertThat(range.isInRange(end)).isFalse();
@@ -95,5 +95,14 @@ public class DateRangeTest {
                 .build();
 
         assertThat(range.isOverlapping(third)).isTrue();
+    }
+
+    @Test
+    public void testIsOpenEnded() {
+        assertThat(range.isOpenEnded()).isFalse();
+        DateRange openRange = DateRange.builder()
+                .from(start)
+                .build();
+        assertThat(openRange.isOpenEnded()).isTrue();
     }
 }

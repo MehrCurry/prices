@@ -1,9 +1,9 @@
 package com.example.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 
-@Repository
-public interface ProductRepository extends JpaRepository<Product,Long>{
+@RepositoryRestResource(collectionResourceRel = "product", path = "product")
+public interface ProductRepository extends PagingAndSortingRepository<Product,Long> {
 }

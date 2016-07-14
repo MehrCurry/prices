@@ -49,4 +49,8 @@ public class Price extends AbstractEntity {
     public boolean isBelongingTo(String countryCode) {
         return this.countryCode.equals(countryCode);
     }
+
+    public boolean isOpenEnded() {
+        return validity.isOpenEnded();
+    }
 }

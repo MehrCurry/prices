@@ -12,8 +12,7 @@ import javax.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -46,6 +45,10 @@ public class Product extends AbstractEntity {
         }
     }
 
+    public Optional<Price> getPrice() {
+        return getPrice(Locale.getDefault().getCountry());
+    }
+
     public Optional<Price> getPrice(String countryCode) {
         return getPrice(countryCode,LocalDateTime.now());
     }
@@ -57,6 +60,33 @@ public class Product extends AbstractEntity {
                 .filter(p -> p.isBelongingTo(countryCode))
                 .filter(p -> p.isValidAt(pointInTime))
                 .findFirst();
+    }
+
+    public void updatePriceByDueDate(Price newPrice) {
+        Price currentPrice=getPrice(newPrice.getCountryCode())
+                .orElseThrow(() -> new IllegalStateException("no current price found"));
+        checkState(currentPrice
+                .isOpenEnded(),"update only works if current price is open ended");
+        checkState(newPrice.getValidity()
+                .getFrom().isAfter(currentPrice.getValidity().getFrom()),"new price must be after current price");
+
+        DateRange range=DateRange.builder()
+                .from(currentPrice.getValidity().getFrom())
+                .to(newPrice.getValidity().getFrom())
+                .build();
+
+        Price currentPriceEnded = Price.builder()
+                .validity(range)
+                .countryCode(currentPrice.getCountryCode())
+                .money(currentPrice.getMoney())
+                .build();
+
+        removePrice(currentPrice);
+        addPrices(currentPriceEnded,newPrice);
+    }
+
+    private void removePrice(Price aPrice) {
+        prices.remove(aPrice);
     }
 
     public void addPrices(List<Price> prices) {
